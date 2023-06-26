@@ -1,32 +1,145 @@
-# Prerequisites
-*.d
+// C++ code //
+// Producers of the code: Ruwayd Raffa & Ethan Applefeld
+// Code production date: February 21, 2023
+// Servo-related codes were borrowed from https://www.youtube.com/watch?v=LXURLvga8bQ
+/* Pizeo speaker-related codes were borrowed from https://www.instructables.com/How-to-use-a-Buzzer-Arduino-Tutorial/ // LED RGB-related codes were
+borrowed from https://arduinogetstarted.com/tutorials/arduino-rgb-led*/
+// The serial communication code was borrowed from the "Digital Read Serial" example.
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
 
-# Precompiled Headers
-*.gch
-*.pch
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+#include <Servo.h>
+Servo myservo;
+int potentio = A5;
+int motionSensor1 = 4;
+int lightSensor1 = A3;
+int lightSensor2 = A4;
+int buzzer = 3;
+int servo = 8;
+int led = 10;
+int potentioState1;
+int motionState1;
+int sensorState1;
+int sensorState2;
+const int potentioThreshold1 = 500;
+int sensorThreshold1 = 80;
+int PIN_GREEN = 11;
+int PIN_BLUE = 12;
+int PIN_RED = 13;
 
-# Fortran module files
-*.mod
-*.smod
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+void setup() {
+// initialize serial communication at 9600 bits per second:
+Serial.begin(9600);
+// make the potentiometer, motion sensor, and light sensor's pins an input:
+// make led lights, piezo speaker, and servomotor's pins an output:
+pinMode(potentio, INPUT);
+pinMode(motionSensor1, INPUT);
+pinMode(lightSensor1, INPUT);
+pinMode(lightSensor2, INPUT);
+pinMode(buzzer, OUTPUT);
+pinMode(servo, OUTPUT);
+pinMode(led, OUTPUT);
+pinMode(PIN_GREEN, OUTPUT);
+pinMode(PIN_BLUE, OUTPUT);
+pinMode(PIN_RED, OUTPUT);
+myservo.attach(8);
+}
 
-# Executables
-*.exe
-*.out
-*.app
+
+void loop() {
+// read the input pins:
+potentioState1 = analogRead(potentio);
+motionState1 = digitalRead(motionSensor1);
+sensorState1 = analogRead(lightSensor1);
+sensorState2 = analogRead(lightSensor2);
+
+
+
+// print out the state of the sensors:
+Serial.print("potentioState1 = ");
+Serial.println(potentioState1);
+Serial.print("motionState1 = ");
+Serial.println(motionState1);
+Serial.print("sensorState1 = ");
+Serial.println(sensorState1);
+Serial.print("sensorState2 = ");
+Serial.println(sensorState2);
+delay(1000);
+
+
+
+// If light sensor 1 exceeds the sensor threshold, the RGB LED lights will turn on.
+if (sensorState1 > sensorThreshold1)
+{
+analogWrite(PIN_GREEN, 247);
+analogWrite(PIN_BLUE, 120);
+analogWrite(PIN_RED, 138);
+
+}
+else { analogWrite(PIN_GREEN, 0);
+analogWrite(PIN_BLUE, 0);
+analogWrite(PIN_RED, 0); }
+
+
+// If light sensor 2 exceeds the sensor threshold, the white LED lights will turn on.
+if (sensorState2 >= sensorThreshold1) {
+digitalWrite(led, HIGH);
+}
+else {
+digitalWrite(led, LOW);
+}
+
+
+// If the motion sensor is detecting any motion, the piezo speaker will make a buzzer sound.
+// If the motion sensor is not detecting any motion, the piezo speaker will stay silent.
+if (motionState1 == HIGH)
+{
+tone(buzzer, 1000); // Send 1KHz sound signal...
+}
+else {noTone(buzzer); // Stop sound...
+}
+
+
+// The servomotor will go to an angle of 90 if potentiometer exceeds threshold of 500.
+// The servomotor will go to an angle of 0 if potentiometer is lower than threshold of 500.
+if (potentioState1 > potentioThreshold1) {
+myservo.write(20);
+delay(100);
+}
+else {myservo.write(0);
+delay(1000);
+}
+
+
+// The Serial Monitor will display statements that parallel the states of the house utilities.
+if (potentioState1 > potentioThreshold1)
+{
+Serial.println("Garage door is open");
+}
+else {Serial.println("Garage door is closed");
+}
+
+if (motionState1 == HIGH)
+{
+Serial.println("Buzzer is on");
+}
+else {Serial.println("Buzzer is off");
+}
+
+if (sensorState1 > sensorThreshold1)
+{
+Serial.println("RGB Lights are on");
+}
+else {Serial.println("RGB Lights are off");
+}
+
+if (sensorState2 > sensorThreshold1)
+{
+Serial.println("White lights are on");
+}
+else {Serial.println("White lights are off");
+}
+}
+
+
